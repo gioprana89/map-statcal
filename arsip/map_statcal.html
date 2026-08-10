@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive geographic distribution of STATCAL members by province.">
+  <title>STATCAL Member Distribution Map</title>
+
+  <!-- Leaflet 1.9.4 -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+
+  <!-- SheetJS Community Edition 0.20.3 -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --statcal-blue: #0b2f78;
+      --statcal-blue-2: #164da5;
+      --statcal-yellow: #e3ff00;
+      --statcal-white: #ffffff;
+      --statcal-ink: #17324d;
+      --panel-shadow: 0 16px 34px rgba(0, 0, 0, 0.23);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eaf2f8;
+    }
+
+    .map-shell {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 480px;
+      background: #eaf2f8;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .map-heading {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 800;
+      width: min(680px, calc(100% - 150px));
+      padding: 13px 22px 12px;
+      text-align: center;
+      color: var(--statcal-white);
+      background: linear-gradient(135deg, rgba(11, 47, 120, 0.96), rgba(22, 77, 165, 0.93));
+      border: 2px solid var(--statcal-yellow);
+      border-radius: 18px;
+      box-shadow: var(--panel-shadow);
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+    }
+
+    .map-heading h1 {
+      margin: 0;
+      color: var(--statcal-yellow);
+      font-size: clamp(18px, 2.3vw, 26px);
+      line-height: 1.15;
+    }
+
+    .map-heading p {
+      margin: 5px 0 0;
+      font-size: clamp(11px, 1.45vw, 14px);
+      line-height: 1.35;
+    }
+
+    .summary-panel {
+      position: absolute;
+      top: 110px;
+      left: 18px;
+      z-index: 800;
+      width: 210px;
+      padding: 15px;
+      color: var(--statcal-white);
+      background: rgba(11, 47, 120, 0.94);
+      border: 1px solid rgba(227, 255, 0, 0.72);
+      border-radius: 16px;
+      box-shadow: var(--panel-shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .summary-title {
+      margin-bottom: 11px;
+      color: var(--statcal-yellow);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 7px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .summary-row:first-of-type {
+      border-top: 0;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      line-height: 1.25;
+      opacity: 0.92;
+    }
+
+    .summary-value {
+      color: var(--statcal-yellow);
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .legend-panel {
+      position: absolute;
+      left: 18px;
+      bottom: 28px;
+      z-index: 800;
+      max-width: 225px;
+      padding: 11px 13px;
+      color: var(--statcal-ink);
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 13px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.19);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .legend-marker {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      margin-right: 7px;
+      align-items: center;
+      justify-content: center;
+      color: var(--statcal-yellow);
+      background: var(--statcal-blue);
+      border: 2px solid var(--statcal-white);
+      border-radius: 50%;
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.24);
+      font-size: 10px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+
+    .loading-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 1000;
+      transform: translate(-50%, -50%);
+      min-width: 260px;
+      max-width: calc(100% - 40px);
+      padding: 17px 22px;
+      color: var(--statcal-blue);
+      background: rgba(255, 255, 255, 0.97);
+      border: 2px solid rgba(11, 47, 120, 0.12);
+      border-radius: 15px;
+      box-shadow: var(--panel-shadow);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .loading-panel.error {
+      color: #7a1f1f;
+    }
+
+    .member-marker-wrap {
+      background: transparent;
+      border: 0;
+    }
+
+    .member-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--statcal-yellow);
+      background:
+        radial-gradient(circle at 35% 28%, #245fb2 0%, var(--statcal-blue) 58%, #06245f 100%);
+      border: 3px solid var(--statcal-white);
+      border-radius: 50%;
+      box-shadow:
+        0 7px 16px rgba(0, 0, 0, 0.34),
+        0 0 0 2px rgba(227, 255, 0, 0.72);
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      user-select: none;
+    }
+
+    .member-marker:hover {
+      transform: scale(1.12);
+      box-shadow:
+        0 9px 19px rgba(0, 0, 0, 0.38),
+        0 0 0 3px rgba(227, 255, 0, 0.9);
+    }
+
+    .statcal-popup {
+      min-width: 180px;
+      color: #283746;
+      line-height: 1.45;
+    }
+
+    .statcal-popup .province {
+      margin-bottom: 7px;
+      color: var(--statcal-blue);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .statcal-popup .member-count {
+      color: var(--statcal-blue-2);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .statcal-tooltip {
+      color: var(--statcal-blue);
+      font-weight: 700;
+    }
+
+    .leaflet-control-zoom a {
+      color: var(--statcal-blue) !important;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 9px;
+    }
+
+    @media (max-width: 720px) {
+      .map-heading {
+        top: 12px;
+        width: calc(100% - 95px);
+        padding: 10px 13px;
+      }
+
+      .summary-panel {
+        top: auto;
+        left: 12px;
+        bottom: 25px;
+        width: 170px;
+        padding: 11px;
+      }
+
+      .summary-title {
+        margin-bottom: 7px;
+        font-size: 11px;
+      }
+
+      .summary-row {
+        padding: 5px 0;
+      }
+
+      .summary-label {
+        font-size: 10px;
+      }
+
+      .summary-value {
+        font-size: 17px;
+      }
+
+      .legend-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="map-shell">
+    <div class="map-heading">
+      <h1>STATCAL Member Distribution</h1>
+      <p>Geographic Distribution of STATCAL Members by Province</p>
+    </div>
+
+    <aside class="summary-panel" aria-label="STATCAL member summary">
+      <div class="summary-title">STATCAL Community</div>
+      <div class="summary-row">
+        <span class="summary-label">Total Members</span>
+        <span class="summary-value" id="totalMembers">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Provinces Covered</span>
+        <span class="summary-value" id="provinceCount">—</span>
+      </div>
+    </aside>
+
+    <div class="legend-panel">
+      <span class="legend-marker">N</span>
+      Number inside each marker represents the number of STATCAL members in that province.
+    </div>
+
+    <div id="loading" class="loading-panel">Loading STATCAL member data…</div>
+    <div id="map" aria-label="Interactive STATCAL member map"></div>
+  </main>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
+
+  <script>
+    const INDONESIA_CENTER = [-2.5, 118.0];
+    const DEFAULT_ZOOM = 5;
+
+    const map = L.map("map", {
+      zoomControl: true,
+      minZoom: 3,
+      maxZoom: 18,
+      worldCopyJump: true
+    }).setView(INDONESIA_CENTER, DEFAULT_ZOOM);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function markerDiameter(memberCount) {
+      const n = Math.max(0, Number(memberCount) || 0);
+      return Math.max(40, Math.min(72, 40 + Math.sqrt(n) * 4));
+    }
+
+    function memberIcon(memberCount) {
+      const diameter = markerDiameter(memberCount);
+      const fontSize = Math.max(13, Math.min(22, diameter * 0.34));
+
+      return L.divIcon({
+        className: "member-marker-wrap",
+        html: `
+          <div class="member-marker"
+               style="width:${diameter}px;height:${diameter}px;font-size:${fontSize}px;">
+            ${escapeHTML(memberCount)}
+          </div>
+        `,
+        iconSize: [diameter, diameter],
+        iconAnchor: [diameter / 2, diameter / 2],
+        popupAnchor: [0, -(diameter / 2 + 4)]
+      });
+    }
+
+    function getMemberCount(row) {
+      const raw =
+        row["Number of Member"] ??
+        row["Number of STATCAL Member"] ??
+        row["Number of STATCAL Members"] ??
+        0;
+
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function addMarkers(rows) {
+      const bounds = [];
+      let totalMembers = 0;
+      let provinceCount = 0;
+
+      rows.forEach((row) => {
+        const province = String(row["Province"] ?? "").trim();
+        const latitude = Number(row["Latitude"]);
+        const longitude = Number(row["Longitude"]);
+        const members = getMemberCount(row);
+
+        if (
+          !province ||
+          !Number.isFinite(latitude) ||
+          !Number.isFinite(longitude) ||
+          latitude < -90 || latitude > 90 ||
+          longitude < -180 || longitude > 180
+        ) {
+          return;
+        }
+
+        totalMembers += members;
+        provinceCount += 1;
+
+        const safeProvince = escapeHTML(province);
+        const safeMembers = escapeHTML(members);
+
+        const marker = L.marker([latitude, longitude], {
+          icon: memberIcon(members),
+          title: `${province}: ${members} STATCAL member${members === 1 ? "" : "s"}`
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <div class="statcal-popup">
+            <div class="province">${safeProvince}</div>
+            <div>
+              Number of STATCAL Members:
+              <span class="member-count">${safeMembers}</span>
+            </div>
+          </div>
+        `);
+
+        marker.bindTooltip(
+          `<span class="statcal-tooltip">${safeProvince}<br>${safeMembers} STATCAL Member${members === 1 ? "" : "s"}</span>`,
+          { direction: "top", offset: [0, -22], opacity: 0.96 }
+        );
+
+        bounds.push([latitude, longitude]);
+      });
+
+      document.getElementById("totalMembers").textContent =
+        totalMembers.toLocaleString("en-US");
+      document.getElementById("provinceCount").textContent =
+        provinceCount.toLocaleString("en-US");
+
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 7);
+      } else if (bounds.length > 1) {
+        map.fitBounds(bounds, {
+          paddingTopLeft: [70, 115],
+          paddingBottomRight: [55, 55],
+          maxZoom: 7
+        });
+      } else {
+        map.setView(INDONESIA_CENTER, DEFAULT_ZOOM);
+      }
+    }
+
+    async function loadExcelData() {
+      const loading = document.getElementById("loading");
+
+      try {
+        // A cache-busting query helps GitHub Pages show newer Excel data after replacement.
+        const excelURL = `./data_long_lat.xlsx?v=${Date.now()}`;
+        const response = await fetch(excelURL, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: data_long_lat.xlsx could not be loaded.`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+        if (!workbook.SheetNames.length) {
+          throw new Error("The Excel workbook does not contain a worksheet.");
+        }
+
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          defval: "",
+          raw: true
+        });
+
+        addMarkers(rows);
+        loading.style.display = "none";
+      } catch (error) {
+        console.error("STATCAL map error:", error);
+        loading.classList.add("error");
+        loading.innerHTML =
+          "Unable to load <strong>data_long_lat.xlsx</strong>.<br>" +
+          "<span style='font-weight:400;'>Place the Excel file in the same folder as map_statcal.html and open it through GitHub Pages or a local web server.</span>";
+      }
+    }
+
+    loadExcelData();
+
+    // Important when this page is embedded in an iframe.
+    window.addEventListener("load", () => {
+      setTimeout(() => map.invalidateSize(), 120);
+    });
+  </script>
+</body>
+</html>

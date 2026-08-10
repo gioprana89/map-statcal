@@ -6,7 +6,6 @@
   <meta name="description" content="Interactive geographic distribution of STATCAL members by province.">
   <title>STATCAL Member Distribution Map</title>
 
-  <!-- Leaflet 1.9.4 -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -14,7 +13,6 @@
     crossorigin=""
   >
 
-  <!-- SheetJS Community Edition 0.20.3 -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
@@ -24,12 +22,13 @@
       --statcal-yellow: #e3ff00;
       --statcal-white: #ffffff;
       --statcal-ink: #17324d;
+      --statcal-border: #dce7f1;
+      --success: #218838;
+      --expired: #b23b3b;
       --panel-shadow: 0 16px 34px rgba(0, 0, 0, 0.23);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html,
     body {
@@ -42,11 +41,14 @@
       background: #eaf2f8;
     }
 
+    button,
+    input { font: inherit; }
+
     .map-shell {
       position: relative;
       width: 100%;
       height: 100vh;
-      min-height: 480px;
+      min-height: 500px;
       background: #eaf2f8;
     }
 
@@ -62,11 +64,11 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 800;
-      width: min(680px, calc(100% - 150px));
+      width: min(700px, calc(100% - 150px));
       padding: 13px 22px 12px;
       text-align: center;
       color: var(--statcal-white);
-      background: linear-gradient(135deg, rgba(11, 47, 120, 0.96), rgba(22, 77, 165, 0.93));
+      background: linear-gradient(135deg, rgba(11,47,120,.96), rgba(22,77,165,.93));
       border: 2px solid var(--statcal-yellow);
       border-radius: 18px;
       box-shadow: var(--panel-shadow);
@@ -95,8 +97,8 @@
       width: 210px;
       padding: 15px;
       color: var(--statcal-white);
-      background: rgba(11, 47, 120, 0.94);
-      border: 1px solid rgba(227, 255, 0, 0.72);
+      background: rgba(11,47,120,.94);
+      border: 1px solid rgba(227,255,0,.72);
       border-radius: 16px;
       box-shadow: var(--panel-shadow);
       backdrop-filter: blur(6px);
@@ -107,7 +109,7 @@
       color: var(--statcal-yellow);
       font-size: 14px;
       font-weight: 800;
-      letter-spacing: 0.35px;
+      letter-spacing: .35px;
       text-transform: uppercase;
     }
 
@@ -117,17 +119,15 @@
       align-items: baseline;
       gap: 12px;
       padding: 7px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      border-top: 1px solid rgba(255,255,255,.15);
     }
 
-    .summary-row:first-of-type {
-      border-top: 0;
-    }
+    .summary-row:first-of-type { border-top: 0; }
 
     .summary-label {
       font-size: 12px;
       line-height: 1.25;
-      opacity: 0.92;
+      opacity: .92;
     }
 
     .summary-value {
@@ -142,12 +142,12 @@
       left: 18px;
       bottom: 28px;
       z-index: 800;
-      max-width: 225px;
+      max-width: 245px;
       padding: 11px 13px;
       color: var(--statcal-ink);
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255,255,255,.95);
       border-radius: 13px;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.19);
+      box-shadow: 0 10px 26px rgba(0,0,0,.19);
       font-size: 11px;
       line-height: 1.45;
     }
@@ -163,7 +163,7 @@
       background: var(--statcal-blue);
       border: 2px solid var(--statcal-white);
       border-radius: 50%;
-      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.24);
+      box-shadow: 0 2px 7px rgba(0,0,0,.24);
       font-size: 10px;
       font-weight: 800;
       vertical-align: middle;
@@ -175,12 +175,12 @@
       left: 50%;
       z-index: 1000;
       transform: translate(-50%, -50%);
-      min-width: 260px;
+      min-width: 290px;
       max-width: calc(100% - 40px);
       padding: 17px 22px;
       color: var(--statcal-blue);
-      background: rgba(255, 255, 255, 0.97);
-      border: 2px solid rgba(11, 47, 120, 0.12);
+      background: rgba(255,255,255,.97);
+      border: 2px solid rgba(11,47,120,.12);
       border-radius: 15px;
       box-shadow: var(--panel-shadow);
       text-align: center;
@@ -188,9 +188,7 @@
       font-weight: 700;
     }
 
-    .loading-panel.error {
-      color: #7a1f1f;
-    }
+    .loading-panel.error { color: #7a1f1f; }
 
     .member-marker-wrap {
       background: transparent;
@@ -207,24 +205,24 @@
       border: 3px solid var(--statcal-white);
       border-radius: 50%;
       box-shadow:
-        0 7px 16px rgba(0, 0, 0, 0.34),
-        0 0 0 2px rgba(227, 255, 0, 0.72);
+        0 7px 16px rgba(0,0,0,.34),
+        0 0 0 2px rgba(227,255,0,.72);
       font-weight: 900;
       line-height: 1;
       cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform .18s ease, box-shadow .18s ease;
       user-select: none;
     }
 
     .member-marker:hover {
       transform: scale(1.12);
       box-shadow:
-        0 9px 19px rgba(0, 0, 0, 0.38),
-        0 0 0 3px rgba(227, 255, 0, 0.9);
+        0 9px 19px rgba(0,0,0,.38),
+        0 0 0 3px rgba(227,255,0,.9);
     }
 
     .statcal-popup {
-      min-width: 180px;
+      min-width: 205px;
       color: #283746;
       line-height: 1.45;
     }
@@ -242,6 +240,12 @@
       font-weight: 900;
     }
 
+    .popup-hint {
+      margin-top: 8px;
+      color: #5d6d7e;
+      font-size: 11px;
+    }
+
     .statcal-tooltip {
       color: var(--statcal-blue);
       font-weight: 700;
@@ -251,8 +255,186 @@
       color: var(--statcal-blue) !important;
     }
 
-    .leaflet-control-attribution {
-      font-size: 9px;
+    .leaflet-control-attribution { font-size: 9px; }
+
+    /* MEMBER MODAL */
+    .member-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(3,18,47,.72);
+      backdrop-filter: blur(5px);
+    }
+
+    .member-modal-backdrop.show { display: flex; }
+
+    .member-modal {
+      width: min(1180px, 96vw);
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--statcal-white);
+      border: 2px solid var(--statcal-yellow);
+      border-radius: 22px;
+      box-shadow: 0 28px 70px rgba(0,0,0,.38);
+    }
+
+    .member-modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px 22px 17px;
+      color: var(--statcal-white);
+      background: linear-gradient(135deg, var(--statcal-blue), var(--statcal-blue-2));
+      border-bottom: 3px solid var(--statcal-yellow);
+    }
+
+    .member-modal-header h2 {
+      margin: 0;
+      color: var(--statcal-yellow);
+      font-size: clamp(20px, 2.4vw, 28px);
+      line-height: 1.2;
+    }
+
+    .member-modal-subtitle {
+      margin-top: 5px;
+      font-size: 13px;
+      opacity: .95;
+    }
+
+    .modal-close {
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 50%;
+      color: var(--statcal-white);
+      background: rgba(255,255,255,.12);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { background: rgba(255,255,255,.22); }
+
+    .member-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      padding: 13px 18px;
+      background: #f7faff;
+      border-bottom: 1px solid var(--statcal-border);
+    }
+
+    .member-result-info {
+      color: var(--statcal-blue);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .member-search {
+      width: min(340px, 100%);
+      padding: 9px 12px;
+      border: 1px solid #bdcbd8;
+      border-radius: 10px;
+      outline: none;
+      color: var(--statcal-ink);
+      background: #fff;
+    }
+
+    .member-search:focus {
+      border-color: var(--statcal-blue-2);
+      box-shadow: 0 0 0 3px rgba(22,77,165,.10);
+    }
+
+    .table-scroll {
+      flex: 1;
+      overflow: auto;
+      background: var(--statcal-white);
+    }
+
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1080px;
+      color: #314354;
+      font-size: 12px;
+    }
+
+    .member-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 11px 10px;
+      color: var(--statcal-white);
+      background: var(--statcal-blue);
+      border-right: 1px solid rgba(255,255,255,.10);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .member-table td {
+      padding: 10px;
+      border-bottom: 1px solid #e5edf4;
+      vertical-align: top;
+    }
+
+    .member-table tbody tr:nth-child(even) { background: #f8fbfe; }
+    .member-table tbody tr:hover { background: #eef5ff; }
+
+    .member-name {
+      color: var(--statcal-blue);
+      font-weight: 800;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-active {
+      color: #fff;
+      background: var(--success);
+    }
+
+    .status-expired {
+      color: #fff;
+      background: var(--expired);
+    }
+
+    .status-other {
+      color: #34495e;
+      background: #e6edf3;
+    }
+
+    .empty-state {
+      padding: 34px 20px;
+      color: #647484;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .modal-footer-note {
+      padding: 10px 16px;
+      color: #667788;
+      background: #f8fbfe;
+      border-top: 1px solid var(--statcal-border);
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
     @media (max-width: 720px) {
@@ -275,21 +457,28 @@
         font-size: 11px;
       }
 
-      .summary-row {
-        padding: 5px 0;
+      .summary-row { padding: 5px 0; }
+      .summary-label { font-size: 10px; }
+      .summary-value { font-size: 17px; }
+      .legend-panel { display: none; }
+
+      .member-modal-backdrop { padding: 10px; }
+
+      .member-modal {
+        width: 100%;
+        max-height: 94vh;
+        border-radius: 16px;
       }
 
-      .summary-label {
-        font-size: 10px;
+      .member-modal-header { padding: 15px; }
+
+      .member-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 11px 13px;
       }
 
-      .summary-value {
-        font-size: 17px;
-      }
-
-      .legend-panel {
-        display: none;
-      }
+      .member-search { width: 100%; }
     }
   </style>
 </head>
@@ -303,10 +492,12 @@
 
     <aside class="summary-panel" aria-label="STATCAL member summary">
       <div class="summary-title">STATCAL Community</div>
+
       <div class="summary-row">
         <span class="summary-label">Total Members</span>
         <span class="summary-value" id="totalMembers">—</span>
       </div>
+
       <div class="summary-row">
         <span class="summary-label">Provinces Covered</span>
         <span class="summary-value" id="provinceCount">—</span>
@@ -315,12 +506,84 @@
 
     <div class="legend-panel">
       <span class="legend-marker">N</span>
-      Number inside each marker represents the number of STATCAL members in that province.
+      Marker numbers are calculated automatically from
+      <strong>data_member_statcal.xlsx</strong>. Click a marker to view members.
     </div>
 
-    <div id="loading" class="loading-panel">Loading STATCAL member data…</div>
+    <div id="loading" class="loading-panel">
+      Loading STATCAL map and member database…
+    </div>
+
     <div id="map" aria-label="Interactive STATCAL member map"></div>
   </main>
+
+  <!-- MEMBER DETAIL MODAL -->
+  <div
+    id="memberModalBackdrop"
+    class="member-modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="memberModalTitle"
+  >
+    <section class="member-modal">
+      <header class="member-modal-header">
+        <div>
+          <h2 id="memberModalTitle">STATCAL Members</h2>
+          <div class="member-modal-subtitle" id="memberModalSubtitle"></div>
+        </div>
+
+        <button
+          id="memberModalClose"
+          class="modal-close"
+          type="button"
+          aria-label="Close member list"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="member-toolbar">
+        <div class="member-result-info" id="memberResultInfo"></div>
+
+        <input
+          id="memberSearch"
+          class="member-search"
+          type="search"
+          placeholder="Search name, institution, location..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="table-scroll">
+        <table class="member-table" id="memberTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Institution</th>
+              <th>Location</th>
+              <th>Occupation</th>
+              <th>Highest Education</th>
+              <th>Membership Start Date</th>
+              <th>Membership Expiry Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="memberTableBody"></tbody>
+        </table>
+
+        <div id="memberEmptyState" class="empty-state" style="display:none;">
+          No member data found.
+        </div>
+      </div>
+
+      <div class="modal-footer-note">
+        Member information is loaded dynamically from
+        <strong>data_member_statcal.xlsx</strong>.
+      </div>
+    </section>
+  </div>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -331,6 +594,9 @@
   <script>
     const INDONESIA_CENTER = [-2.5, 118.0];
     const DEFAULT_ZOOM = 5;
+
+    let allMemberRows = [];
+    let currentProvinceMembers = [];
 
     const map = L.map("map", {
       zoomControl: true,
@@ -353,14 +619,22 @@
         .replaceAll("'", "&#039;");
     }
 
+    function normalizeText(value) {
+      return String(value ?? "").trim();
+    }
+
+    function normalizeProvince(value) {
+      return normalizeText(value).toLocaleLowerCase("id-ID");
+    }
+
     function markerDiameter(memberCount) {
       const n = Math.max(0, Number(memberCount) || 0);
-      return Math.max(40, Math.min(72, 40 + Math.sqrt(n) * 4));
+      return Math.max(40, Math.min(76, 40 + Math.sqrt(n) * 4));
     }
 
     function memberIcon(memberCount) {
       const diameter = markerDiameter(memberCount);
-      const fontSize = Math.max(13, Math.min(22, diameter * 0.34));
+      const fontSize = Math.max(13, Math.min(22, diameter * .34));
 
       return L.divIcon({
         className: "member-marker-wrap",
@@ -376,27 +650,259 @@
       });
     }
 
-    function getMemberCount(row) {
-      const raw =
-        row["Number of Member"] ??
-        row["Number of STATCAL Member"] ??
-        row["Number of STATCAL Members"] ??
-        0;
+    function toDateDisplay(value) {
+      if (value === null || value === undefined || value === "") return "";
 
-      const value = Number(raw);
-      return Number.isFinite(value) ? value : 0;
+      if (value instanceof Date && !isNaN(value)) {
+        return new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        }).format(value);
+      }
+
+      if (typeof value === "number") {
+        const parsed = XLSX.SSF.parse_date_code(value);
+
+        if (parsed) {
+          const d = new Date(parsed.y, parsed.m - 1, parsed.d);
+
+          return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+          }).format(d);
+        }
+      }
+
+      return String(value);
     }
 
-    function addMarkers(rows) {
-      const bounds = [];
-      let totalMembers = 0;
-      let provinceCount = 0;
+    function statusClass(status) {
+      const value = normalizeText(status).toLowerCase();
 
-      rows.forEach((row) => {
-        const province = String(row["Province"] ?? "").trim();
+      if (value === "active") return "status-active";
+      if (value === "expired") return "status-expired";
+
+      return "status-other";
+    }
+
+    async function readExcelFile(url) {
+      const response = await fetch(`${url}?v=${Date.now()}`, {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${url} could not be loaded.`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+
+      const workbook = XLSX.read(arrayBuffer, {
+        type: "array",
+        cellDates: true
+      });
+
+      if (!workbook.SheetNames.length) {
+        throw new Error(`${url} does not contain a worksheet.`);
+      }
+
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      return XLSX.utils.sheet_to_json(worksheet, {
+        defval: "",
+        raw: true
+      });
+    }
+
+    function validateCoordinates(rows) {
+      const required = ["Province", "Longitude", "Latitude"];
+
+      if (!rows.length) {
+        throw new Error("data_long_lat.xlsx contains no data.");
+      }
+
+      const keys = Object.keys(rows[0]);
+      const missing = required.filter(column => !keys.includes(column));
+
+      if (missing.length) {
+        throw new Error(
+          `data_long_lat.xlsx is missing column(s): ${missing.join(", ")}`
+        );
+      }
+    }
+
+    function validateMembers(rows) {
+      if (!rows.length) {
+        throw new Error("data_member_statcal.xlsx contains no member data.");
+      }
+
+      // Backward compatibility: Id -> ID
+      rows.forEach(row => {
+        if (!("ID" in row) && ("Id" in row)) {
+          row["ID"] = row["Id"];
+        }
+      });
+
+      const required = [
+        "ID",
+        "Name",
+        "Institution",
+        "Province",
+        "Location",
+        "Occupation",
+        "Highest Education",
+        "Membership Start Date",
+        "Membership Expiry Date",
+        "Membership Status"
+      ];
+
+      const keys = Object.keys(rows[0]);
+
+      if (!keys.includes("ID") && keys.includes("Id")) {
+        keys.push("ID");
+      }
+
+      const missing = required.filter(column => !keys.includes(column));
+
+      if (missing.length) {
+        throw new Error(
+          `data_member_statcal.xlsx is missing column(s): ${missing.join(", ")}`
+        );
+      }
+    }
+
+    function membersForProvince(province) {
+      const key = normalizeProvince(province);
+
+      return allMemberRows.filter(
+        row => normalizeProvince(row["Province"]) === key
+      );
+    }
+
+    function renderMemberRows(rows) {
+      const tbody = document.getElementById("memberTableBody");
+      const table = document.getElementById("memberTable");
+      const empty = document.getElementById("memberEmptyState");
+
+      if (!rows.length) {
+        tbody.innerHTML = "";
+        table.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+
+      table.style.display = "table";
+      empty.style.display = "none";
+
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${escapeHTML(row["ID"])}</td>
+          <td class="member-name">${escapeHTML(row["Name"])}</td>
+          <td>${escapeHTML(row["Institution"])}</td>
+          <td>${escapeHTML(row["Location"])}</td>
+          <td>${escapeHTML(row["Occupation"])}</td>
+          <td>${escapeHTML(row["Highest Education"])}</td>
+          <td>${escapeHTML(toDateDisplay(row["Membership Start Date"]))}</td>
+          <td>${escapeHTML(toDateDisplay(row["Membership Expiry Date"]))}</td>
+          <td>
+            <span class="status-badge ${statusClass(row["Membership Status"])}">
+              ${escapeHTML(row["Membership Status"])}
+            </span>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function updateResultInfo(shown, total) {
+      const info = document.getElementById("memberResultInfo");
+
+      if (shown === total) {
+        info.textContent =
+          `${total.toLocaleString("en-US")} member${total === 1 ? "" : "s"}`;
+      } else {
+        info.textContent =
+          `${shown.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} members`;
+      }
+    }
+
+    function openMemberModal(province) {
+      currentProvinceMembers = membersForProvince(province);
+
+      document.getElementById("memberModalTitle").textContent =
+        `STATCAL Members — ${province}`;
+
+      document.getElementById("memberModalSubtitle").textContent =
+        `Member directory for ${province}`;
+
+      document.getElementById("memberSearch").value = "";
+
+      updateResultInfo(
+        currentProvinceMembers.length,
+        currentProvinceMembers.length
+      );
+
+      renderMemberRows(currentProvinceMembers);
+
+      document.getElementById("memberModalBackdrop").classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeMemberModal() {
+      document.getElementById("memberModalBackdrop").classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    function filterCurrentMembers(query) {
+      const q = normalizeText(query).toLowerCase();
+
+      if (!q) {
+        renderMemberRows(currentProvinceMembers);
+
+        updateResultInfo(
+          currentProvinceMembers.length,
+          currentProvinceMembers.length
+        );
+
+        return;
+      }
+
+      const filtered = currentProvinceMembers.filter(row => {
+        const haystack = [
+          row["ID"],
+          row["Name"],
+          row["Institution"],
+          row["Location"],
+          row["Occupation"],
+          row["Highest Education"],
+          row["Membership Status"]
+        ]
+        .map(normalizeText)
+        .join(" ")
+        .toLowerCase();
+
+        return haystack.includes(q);
+      });
+
+      renderMemberRows(filtered);
+      updateResultInfo(filtered.length, currentProvinceMembers.length);
+    }
+
+    function addMarkers(coordinateRows) {
+      const bounds = [];
+
+      const provinceKeysWithMembers = new Set(
+        allMemberRows
+          .map(row => normalizeProvince(row["Province"]))
+          .filter(Boolean)
+      );
+
+      coordinateRows.forEach(row => {
+        const province = normalizeText(row["Province"]);
         const latitude = Number(row["Latitude"]);
         const longitude = Number(row["Longitude"]);
-        const members = getMemberCount(row);
+        const provinceMembers = membersForProvince(province);
+        const memberCount = provinceMembers.length;
 
         if (
           !province ||
@@ -408,39 +914,57 @@
           return;
         }
 
-        totalMembers += members;
-        provinceCount += 1;
-
         const safeProvince = escapeHTML(province);
-        const safeMembers = escapeHTML(members);
+        const safeCount = escapeHTML(memberCount);
 
         const marker = L.marker([latitude, longitude], {
-          icon: memberIcon(members),
-          title: `${province}: ${members} STATCAL member${members === 1 ? "" : "s"}`
+          icon: memberIcon(memberCount),
+          title:
+            `${province}: ${memberCount} STATCAL member` +
+            `${memberCount === 1 ? "" : "s"}`
         }).addTo(map);
 
         marker.bindPopup(`
           <div class="statcal-popup">
             <div class="province">${safeProvince}</div>
+
             <div>
               Number of STATCAL Members:
-              <span class="member-count">${safeMembers}</span>
+              <span class="member-count">${safeCount}</span>
+            </div>
+
+            <div class="popup-hint">
+              Click the marker to view the member directory.
             </div>
           </div>
         `);
 
         marker.bindTooltip(
-          `<span class="statcal-tooltip">${safeProvince}<br>${safeMembers} STATCAL Member${members === 1 ? "" : "s"}</span>`,
-          { direction: "top", offset: [0, -22], opacity: 0.96 }
+          `<span class="statcal-tooltip">
+             ${safeProvince}<br>
+             ${safeCount} STATCAL Member${memberCount === 1 ? "" : "s"}
+           </span>`,
+          {
+            direction: "top",
+            offset: [0, -22],
+            opacity: .96
+          }
         );
+
+        marker.on("click", () => {
+          // Allow Leaflet popup to appear briefly,
+          // then open the complete member directory.
+          setTimeout(() => openMemberModal(province), 160);
+        });
 
         bounds.push([latitude, longitude]);
       });
 
       document.getElementById("totalMembers").textContent =
-        totalMembers.toLocaleString("en-US");
+        allMemberRows.length.toLocaleString("en-US");
+
       document.getElementById("provinceCount").textContent =
-        provinceCount.toLocaleString("en-US");
+        provinceKeysWithMembers.size.toLocaleString("en-US");
 
       if (bounds.length === 1) {
         map.setView(bounds[0], 7);
@@ -455,45 +979,62 @@
       }
     }
 
-    async function loadExcelData() {
+    async function loadApplicationData() {
       const loading = document.getElementById("loading");
 
       try {
-        // A cache-busting query helps GitHub Pages show newer Excel data after replacement.
-        const excelURL = `./data_long_lat.xlsx?v=${Date.now()}`;
-        const response = await fetch(excelURL, { cache: "no-store" });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: data_long_lat.xlsx could not be loaded.`);
+        if (typeof XLSX === "undefined") {
+          throw new Error("SheetJS library failed to load.");
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const [coordinateRows, memberRows] = await Promise.all([
+          readExcelFile("./data_long_lat.xlsx"),
+          readExcelFile("./data_member_statcal.xlsx")
+        ]);
 
-        if (!workbook.SheetNames.length) {
-          throw new Error("The Excel workbook does not contain a worksheet.");
-        }
+        validateCoordinates(coordinateRows);
+        validateMembers(memberRows);
 
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(worksheet, {
-          defval: "",
-          raw: true
-        });
+        allMemberRows = memberRows;
 
-        addMarkers(rows);
+        addMarkers(coordinateRows);
+
         loading.style.display = "none";
       } catch (error) {
         console.error("STATCAL map error:", error);
+
         loading.classList.add("error");
+
         loading.innerHTML =
-          "Unable to load <strong>data_long_lat.xlsx</strong>.<br>" +
-          "<span style='font-weight:400;'>Place the Excel file in the same folder as map_statcal.html and open it through GitHub Pages or a local web server.</span>";
+          `<strong>Unable to load STATCAL map data.</strong><br>` +
+          `<span style="font-weight:400;">${escapeHTML(error.message)}</span><br><br>` +
+          `<span style="font-weight:400;">Make sure <strong>data_long_lat.xlsx</strong> and <strong>data_member_statcal.xlsx</strong> are in the same folder as map_statcal.html.</span>`;
       }
     }
 
-    loadExcelData();
+    document.getElementById("memberModalClose")
+      .addEventListener("click", closeMemberModal);
 
-    // Important when this page is embedded in an iframe.
+    document.getElementById("memberModalBackdrop")
+      .addEventListener("click", event => {
+        if (event.target.id === "memberModalBackdrop") {
+          closeMemberModal();
+        }
+      });
+
+    document.getElementById("memberSearch")
+      .addEventListener("input", event => {
+        filterCurrentMembers(event.target.value);
+      });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeMemberModal();
+      }
+    });
+
+    loadApplicationData();
+
     window.addEventListener("load", () => {
       setTimeout(() => map.invalidateSize(), 120);
     });
