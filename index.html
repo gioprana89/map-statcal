@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STATCAL</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./tombol_css.css">
+
+  <style>
+    a:link { text-decoration: none; }
+    a:visited { text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:active { text-decoration: underline; }
+
+    .statcal-font {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+    }
+
+    .statcal-online-section {
+      width: 78%;
+      margin: 35px auto 50px auto;
+      padding: 34px 34px 28px 34px;
+      border: 2px solid rgba(227, 255, 0, 0.95);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.10);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(4px);
+    }
+
+    .statcal-online-grid {
+      display: grid;
+      grid-template-columns: 36% 64%;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .statcal-online-title {
+      color: #e3ff00;
+      font-size: 34px;
+      line-height: 1.15;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .statcal-online-subtitle {
+      color: #ffffff;
+      font-size: 20px;
+      line-height: 1.45;
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .statcal-online-text {
+      color: #ffffff;
+      font-size: 17px;
+      line-height: 1.65;
+      text-align: justify;
+      margin-bottom: 16px;
+    }
+
+    .statcal-online-highlight {
+      color: #e3ff00;
+      font-weight: bold;
+    }
+
+    .statcal-online-features {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      margin-bottom: 18px;
+    }
+
+    .statcal-online-feature-card {
+      padding: 13px 15px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 15px;
+      line-height: 1.35;
+      text-align: left;
+    }
+
+    .statcal-online-feature-card span {
+      color: #e3ff00;
+      font-weight: bold;
+    }
+
+    .statcal-online-button {
+      display: inline-block;
+      padding: 13px 22px;
+      border-radius: 35px;
+      background: #e3ff00;
+      color: #0b2f78 !important;
+      font-size: 17px;
+      font-weight: bold;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.20);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .statcal-online-button:hover {
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
+    }
+
+    .online-illustration {
+      position: relative;
+      min-height: 365px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(205,233,255,0.88));
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.75), 0 20px 40px rgba(0,0,0,0.18);
+    }
+
+    .online-illustration::before {
+      content: "";
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      right: -110px;
+      top: -120px;
+      border-radius: 50%;
+      background: rgba(31, 78, 121, 0.10);
+    }
+
+    .online-illustration::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      left: -120px;
+      bottom: -110px;
+      border-radius: 50%;
+      background: rgba(227, 255, 0, 0.18);
+    }
+
+    .browser-window {
+      position: absolute;
+      left: 42px;
+      right: 42px;
+      top: 46px;
+      height: 230px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 35px rgba(31, 78, 121, 0.28);
+      overflow: hidden;
+      border: 2px solid rgba(31, 78, 121, 0.18);
+      z-index: 2;
+    }
+
+    .browser-header {
+      height: 34px;
+      background: #1f4e79;
+      display: flex;
+      align-items: center;
+      padding-left: 14px;
+      gap: 7px;
+    }
+
+    .browser-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e3ff00;
+      opacity: 0.95;
+    }
+
+    .browser-content {
+      display: grid;
+      grid-template-columns: 29% 71%;
+      height: 196px;
+    }
+
+    .browser-sidebar {
+      background: #eef6ff;
+      border-right: 1px solid #d5e7f5;
+      padding: 12px;
+    }
+
+    .menu-line {
+      height: 12px;
+      margin: 9px 0;
+      border-radius: 30px;
+      background: #1f4e79;
+      opacity: 0.85;
+    }
+
+    .menu-line.short { width: 68%; }
+    .menu-line.medium { width: 84%; }
+    .menu-line.long { width: 95%; }
+
+    .browser-main {
+      padding: 16px 18px;
+      position: relative;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mini-chart {
+      height: 76px;
+      border-radius: 12px;
+      background: #f7fbff;
+      border: 1px solid #d7e8f6;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar {
+      position: absolute;
+      bottom: 12px;
+      width: 12px;
+      background: #1f4e79;
+      border-radius: 3px 3px 0 0;
+    }
+
+    .bar.b1 { left: 18px; height: 22px; }
+    .bar.b2 { left: 40px; height: 38px; }
+    .bar.b3 { left: 62px; height: 52px; }
+    .bar.b4 { left: 84px; height: 33px; }
+
+    .line-chart svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .table-mini {
+      height: 64px;
+      border-radius: 12px;
+      background: #f7fbff;
+      border: 1px solid #d7e8f6;
+      padding: 9px;
+    }
+
+    .table-mini div {
+      height: 8px;
+      margin-bottom: 7px;
+      border-radius: 20px;
+      background: rgba(31, 78, 121, 0.30);
+    }
+
+    .cloud-icon,
+    .python-icon,
+    .streamlit-icon,
+    .rshiny-icon,
+    .map-icon {
+      position: absolute;
+      z-index: 4;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      color: #ffffff;
+      background: #1f4e79;
+      box-shadow: 0 14px 26px rgba(0,0,0,0.20);
+      border: 4px solid rgba(255,255,255,0.85);
+    }
+
+    .cloud-icon { left: 28px; bottom: 28px; }
+    .python-icon { right: 30px; bottom: 30px; }
+    .streamlit-icon { right: 115px; bottom: 18px; background: #e3ff00; color: #1f4e79; }
+    .rshiny-icon { right: 200px; bottom: 18px; background: #276dc3; color: #ffffff; font-weight: bold; font-size: 30px; }
+    .map-icon { left: 116px; bottom: 18px; background: #2f9ea9; }
+
+    .online-caption {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 92px;
+      z-index: 5;
+      color: #1f4e79;
+      font-size: 20px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    /* =====================================================
+       SCOPUS CITATION INFORMATION FOR STATCAL
+       Gambar di atas, tulisan di bawah
+       ===================================================== */
+
+    .statcal-citation-section {
+      width: 78%;
+      margin: 35px auto 45px auto;
+      padding: 30px 34px;
+      border-radius: 26px;
+      border: 2px solid rgba(227, 255, 0, 0.95);
+      background: rgba(0, 20, 60, 0.58);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.30);
+      backdrop-filter: blur(4px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .statcal-citation-title {
+      color: #e3ff00;
+      font-size: 34px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.2;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.60);
+    }
+
+    .statcal-citation-subtitle {
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.55;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto 26px auto;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.60);
+    }
+
+    .statcal-citation-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .statcal-citation-image-box {
+      text-align: center;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .statcal-citation-image-box img {
+      width: 100%;
+      max-width: 760px;
+      height: auto;
+      border-radius: 18px;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .statcal-citation-card {
+      color: #ffffff;
+      font-size: 17px;
+      line-height: 1.65;
+      text-align: left;
+      padding: 24px 28px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.60);
+    }
+
+    .statcal-citation-card h3 {
+      color: #e3ff00;
+      font-size: 24px;
+      line-height: 1.35;
+      margin-top: 0;
+      margin-bottom: 16px;
+      text-align: center;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.60);
+    }
+
+    .statcal-citation-card p {
+      margin-bottom: 13px;
+    }
+
+    .statcal-citation-label {
+      color: #e3ff00;
+      font-weight: bold;
+    }
+
+    .statcal-citation-doi {
+      color: #e3ff00 !important;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .statcal-citation-format {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(227, 255, 0, 0.16);
+      border-left: 5px solid #e3ff00;
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.55;
+      box-shadow: inset 0 0 0 1px rgba(227, 255, 0, 0.18);
+    }
+
+    /* Footer and long-page visibility fixes */
+    html, body {
+      min-height: 100%;
+    }
+
+    .wrapper {
+      min-height: 100vh;
+      height: auto !important;
+      overflow: visible !important;
+      padding-bottom: 90px;
+    }
+
+    .wrapper > *:not(.bg-bubbles) {
+      position: relative;
+      z-index: 2;
+    }
+
+    .bg-bubbles {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .statcal-article-section {
+      width: 100%;
+      margin-top: 30px;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .statcal-footer-email {
+      color: #e3ff00;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      margin-top: 35px;
+      margin-bottom: 80px;
+      padding: 12px 18px;
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 18px;
+    }
+
+    @media (max-width: 950px) {
+      .statcal-online-section {
+        width: 90%;
+        padding: 24px;
+      }
+
+      .statcal-online-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .statcal-online-features {
+        grid-template-columns: 1fr;
+      }
+
+      .statcal-online-title,
+      .statcal-online-subtitle {
+        text-align: center;
+      }
+
+      .statcal-online-text {
+        text-align: left;
+      }
+
+      .statcal-citation-section {
+        width: 90%;
+        padding: 24px;
+      }
+
+      .statcal-citation-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .statcal-citation-title {
+        font-size: 30px;
+      }
+
+      .statcal-citation-subtitle {
+        font-size: 16px;
+      }
+
+      .statcal-citation-card {
+        font-size: 16px;
+        text-align: left;
+        padding: 20px;
+      }
+
+      .statcal-citation-card h3 {
+        font-size: 22px;
+      }
+
+      .statcal-citation-image-box img {
+        max-width: 100%;
+      }
+    }
+
+
+    /* =====================================================
+       REFINED LAYOUT: STATCAL ONLINE INNOVATION
+       Ilustrasi di atas, konten rapi di bawah
+       ===================================================== */
+
+    .statcal-online-section {
+      width: 82%;
+      max-width: 1180px;
+      margin: 42px auto 58px auto;
+      padding: 32px;
+      border: 2px solid rgba(227, 255, 0, 0.95);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at top left, rgba(227, 255, 0, 0.18), transparent 28%),
+        linear-gradient(145deg, rgba(0, 25, 75, 0.72), rgba(0, 45, 110, 0.42));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(6px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .statcal-online-section::before {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      right: -180px;
+      top: -180px;
+      border-radius: 50%;
+      background: rgba(227, 255, 0, 0.12);
+      pointer-events: none;
+    }
+
+    .statcal-online-section::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      left: -150px;
+      bottom: -150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .statcal-online-section > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .statcal-online-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .statcal-online-kicker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0 auto 20px auto;
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: rgba(227, 255, 0, 0.16);
+      border: 1px solid rgba(227, 255, 0, 0.48);
+      color: #e3ff00;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      text-align: center;
+      width: fit-content;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .statcal-online-kicker::before {
+      content: "●";
+      font-size: 12px;
+      color: #e3ff00;
+    }
+
+    .statcal-online-visual-wrap {
+      padding: 14px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    .online-illustration {
+      position: relative;
+      min-height: 390px;
+      border-radius: 24px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.98), rgba(205,233,255,0.90)),
+        radial-gradient(circle at 20% 20%, rgba(227, 255, 0, 0.20), transparent 36%);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.82), 0 20px 42px rgba(0,0,0,0.24);
+    }
+
+    .browser-window {
+      left: 8%;
+      right: 8%;
+      top: 48px;
+      height: 235px;
+      border-radius: 18px;
+    }
+
+    .browser-content {
+      height: 201px;
+    }
+
+    .online-caption {
+      bottom: 95px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.80);
+      border: 1px solid rgba(31, 78, 121, 0.16);
+      color: #1f4e79;
+      font-size: 20px;
+      box-shadow: 0 12px 24px rgba(31, 78, 121, 0.15);
+    }
+
+    .statcal-online-content-card {
+      padding: 30px 34px 28px 34px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .statcal-online-title {
+      color: #e3ff00;
+      font-size: 38px;
+      line-height: 1.18;
+      font-weight: bold;
+      text-align: center;
+      margin: 0 0 12px 0;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.45);
+    }
+
+    .statcal-online-subtitle {
+      max-width: 940px;
+      color: #ffffff;
+      font-size: 20px;
+      line-height: 1.55;
+      text-align: center;
+      margin: 0 auto 24px auto;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.42);
+    }
+
+    .statcal-online-text-wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .statcal-online-text {
+      color: #ffffff;
+      font-size: 17px;
+      line-height: 1.72;
+      text-align: justify;
+      margin: 0;
+      padding: 0 2px;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.40);
+    }
+
+    .statcal-online-tech-strip {
+      max-width: 980px;
+      margin: 24px auto 6px auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .statcal-online-tech-pill {
+      padding: 13px 16px;
+      border-radius: 18px;
+      background: rgba(227, 255, 0, 0.13);
+      border: 1px solid rgba(227, 255, 0, 0.36);
+      color: #ffffff;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .statcal-online-tech-pill strong {
+      color: #e3ff00;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .statcal-online-features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px auto 24px auto;
+      max-width: 980px;
+    }
+
+    .statcal-online-feature-card {
+      min-height: 112px;
+      padding: 18px 18px 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      color: #ffffff;
+      font-size: 15px;
+      line-height: 1.45;
+      text-align: left;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .statcal-online-feature-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .statcal-online-feature-card span {
+      display: block;
+      color: #e3ff00;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    .statcal-online-action-row {
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .statcal-online-button {
+      display: inline-block;
+      padding: 14px 26px;
+      border-radius: 999px;
+      background: #e3ff00;
+      color: #0b2f78 !important;
+      font-size: 17px;
+      font-weight: bold;
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .statcal-online-button:hover {
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(0, 0, 0, 0.32);
+    }
+
+    @media (max-width: 1050px) {
+      .statcal-online-section {
+        width: 90%;
+        padding: 26px;
+      }
+
+      .statcal-online-features,
+      .statcal-online-tech-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .statcal-online-section {
+        width: 92%;
+        padding: 20px;
+      }
+
+      .statcal-online-content-card {
+        padding: 24px 20px;
+      }
+
+      .statcal-online-title {
+        font-size: 30px;
+      }
+
+      .statcal-online-subtitle {
+        font-size: 17px;
+      }
+
+      .statcal-online-text {
+        font-size: 16px;
+        text-align: left;
+      }
+
+      .statcal-online-features,
+      .statcal-online-tech-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .online-illustration {
+        min-height: 340px;
+      }
+
+      .browser-window {
+        left: 28px;
+        right: 28px;
+        top: 40px;
+      }
+
+      .online-caption {
+        white-space: normal;
+        text-align: center;
+        width: calc(100% - 60px);
+        font-size: 17px;
+      }
+
+      .rshiny-icon { right: 172px; }
+      .streamlit-icon { right: 92px; }
+      .python-icon { right: 22px; }
+      .map-icon { left: 96px; }
+      .cloud-icon { left: 22px; }
+    }
+
+  
+    /* =====================================================
+       STATCAL MEMBER DISTRIBUTION MAP
+       ===================================================== */
+
+    .statcal-map-section {
+      width: 82%;
+      max-width: 1180px;
+      margin: 42px auto 58px auto;
+      padding: 30px 32px 34px;
+      border: 2px solid rgba(227, 255, 0, 0.95);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at top right, rgba(227, 255, 0, 0.16), transparent 29%),
+        linear-gradient(145deg, rgba(0, 25, 75, 0.72), rgba(0, 45, 110, 0.42));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(6px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .statcal-map-section::before {
+      content: "";
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      left: -160px;
+      top: -170px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .statcal-map-section > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .statcal-map-kicker {
+      width: fit-content;
+      margin: 0 auto 13px;
+      padding: 8px 17px;
+      color: #e3ff00;
+      background: rgba(227, 255, 0, 0.14);
+      border: 1px solid rgba(227, 255, 0, 0.45);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+    }
+
+    .statcal-map-title {
+      margin: 0 0 10px;
+      color: #e3ff00;
+      font-size: 36px;
+      line-height: 1.2;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.45);
+    }
+
+    .statcal-map-subtitle {
+      max-width: 860px;
+      margin: 0 auto 24px;
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.55;
+      text-align: center;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.42);
+    }
+
+    .statcal-map-frame-wrap {
+      padding: 13px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    .statcal-map-frame {
+      display: block;
+      width: 100%;
+      height: 680px;
+      border: 0;
+      border-radius: 20px;
+      background: #eaf2f8;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.25);
+    }
+
+    .statcal-map-note {
+      margin: 16px auto 0;
+      max-width: 880px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 1050px) {
+      .statcal-map-section {
+        width: 90%;
+        padding: 25px;
+      }
+
+      .statcal-map-frame {
+        height: 620px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .statcal-map-section {
+        width: 92%;
+        padding: 19px;
+      }
+
+      .statcal-map-title {
+        font-size: 29px;
+      }
+
+      .statcal-map-subtitle {
+        font-size: 16px;
+      }
+
+      .statcal-map-frame-wrap {
+        padding: 8px;
+      }
+
+      .statcal-map-frame {
+        height: 560px;
+        border-radius: 16px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+<!-- partial:index.partial.html -->
+<div class="wrapper">
+
+  <center>
+    <table width="100%" height="50px" border="0">
+      <tr>
+        <td width="33%" valign="top"></td>
+        <td width="15%" valign="top"></td>
+        <td width="52%" valign="center" align="left">
+          <a href="statcal online.html"><font color="#ff4500"><font class="statcal-font">STATCAL with Online Version </font></font></a> |
+          <a href="material.html"><font color="#ff4500"><font class="statcal-font">Material</font></font></a> |
+          <a href="team.html"><font color="#ff4500"><font class="statcal-font">Team</font></font></a> |
+          <a href="donasi.html"><font color="#ff4500"><font class="statcal-font">Donation</font></font></a> |
+          <a href="sharing statcal.html"><font color="#ff4500"><font class="statcal-font">Sharing</font></font></a>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <center>
+    <table width="100%" border="0">
+      <tr>
+        <td width="10%" valign="top"></td>
+
+        <td width="20%" valign="top">
+          <div style="font-size: 40px; font-weight: 900px;">
+            <h1><img src="logo.png" width="70px"> STATCAL</h1>
+          </div>
+
+          <h2>Easy Statistical Application to Educate</h2>
+
+          <br><br>
+
+          <a href="download statcal.html">
+            <button class="button">
+              <div class="icon">
+                <svg viewBox="0 0 14 15">
+                  <line x1="5" y1="13" x2="5" y2="1"></line>
+                  <polyline id="tick" points="1 9.5 5 13.5 13 5.5"></polyline>
+                  <polyline id="normal" points="1 9.5 5 13.5 9 9.5"></polyline>
+                </svg>
+                <div>
+                  <svg viewBox="0 0 24 24"></svg>
+                </div>
+              </div>
+              <ul>
+                <li>&#68;ownload STATCAL</li>
+              </ul>
+            </button>
+          </a>
+        </td>
+
+        <td width="70%" valign="top">
+          <center>
+            <img src="gambar3.png" width="70%">
+          </center>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br><br><br>
+
+  <center>
+    <table width="70%" height="100px" border="0">
+      <tr>
+        <td width="33%">
+          <center><img src="A11.png" width="100px"></center>
+        </td>
+        <td width="33%">
+          <center><img src="A12.png" width="100px"></center>
+        </td>
+        <td width="34%">
+          <center><img src="A13.png" width="100px"></center>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <center>
+    <table width="70%" height="50px" border="0">
+      <tr>
+        <td width="33%" valign="top">
+          <center>
+            <font color="#e3ff00">
+              <font class="statcal-font">
+                STATCAL (Statistical Calculator) is one of free statistical application program.
+              </font>
+            </font>
+          </center>
+        </td>
+
+        <td width="33%" valign="top">
+          <center>
+            <font color="#e3ff00">
+              <font class="statcal-font">
+                STATCAL is created using R programming language in RStudio using various R packages to perform graphical and statistical analysis.
+              </font>
+            </font>
+          </center>
+        </td>
+
+        <td width="34%" valign="top">
+          <center>
+            <font color="#e3ff00">
+              <font class="statcal-font">
+                STATCAL is an userfriendly statistical application program which is designed as simple as possible so that only need a few step to obtain result.
+              </font>
+            </font>
+          </center>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <br><br>
+
+  <!-- =====================================================
+       NEW SECTION: SCOPUS CITATION INFORMATION FOR STATCAL
+       ===================================================== -->
+  <section class="statcal-citation-section statcal-font">
+    <div class="statcal-citation-title">How to Cite STATCAL</div>
+
+    <div class="statcal-citation-subtitle">
+      The following Scopus-indexed article provides a brief overview of the STATCAL Statistical Application Program and can be used as a citation reference for STATCAL.
+    </div>
+
+    <div class="statcal-citation-grid">
+
+      <div class="statcal-citation-image-box">
+        <a href = "https://www.scopus.com/pages/publications/85048885596?origin=resultslist#tab=citedBy" target = "_blank"><img src="sitasi_statcal.png" alt="Scopus citation information for Brief Overview of STATCAL Statistical Application Program"></a>
+      </div>
+
+      <div class="statcal-citation-card">
+        <h3>Brief Overview of STATCAL Statistical Application Program</h3>
+
+        <p>
+          <span class="statcal-citation-label">Publication:</span>
+          Journal of Physics: Conference Series, Conference Paper, Open Access, 2018.
+        </p>
+
+        <p>
+          <span class="statcal-citation-label">DOI:</span>
+          <a class="statcal-citation-doi" href="https://doi.org/10.1088/1742-6596/1028/1/012244" target="_blank">
+            10.1088/1742-6596/1028/1/012244
+          </a>
+        </p>
+
+        <p>
+          <span class="statcal-citation-label">Authors:</span>
+          Dian Utami Sutiksno; Prana Ugiana Gio; Rezzy Eko Caraka; Ansari Saleh Ahmar.
+        </p>
+
+        <p>
+          This article can be used by researchers, students, and practitioners when referring to or citing the STATCAL Statistical Application Program in academic writing, scientific reports, theses, dissertations, and journal articles.
+        </p>
+
+        <div class="statcal-citation-format">
+          <strong>Recommended citation format:</strong><br>
+          Dian Utami Sutiksno et al 2018 <em>J. Phys.: Conf. Ser.</em> 1028 012244
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <br><br>
+
+  <!-- =====================================================
+       NEW SECTION: STATCAL ONLINE INNOVATION
+       Refined layout: gambar di atas, tulisan di bawah
+       ===================================================== -->
+  <section class="statcal-online-section statcal-font">
+
+    <div style="text-align:center;">
+      <div class="statcal-online-kicker">STATCAL ONLINE Web Innovation</div>
+    </div>
+
+    <div class="statcal-online-grid">
+
+      <div class="statcal-online-visual-wrap">
+        <div class="online-illustration">
+          <div class="browser-window">
+            <div class="browser-header">
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+              <div class="browser-dot"></div>
+            </div>
+
+            <div class="browser-content">
+              <div class="browser-sidebar">
+                <div class="menu-line long"></div>
+                <div class="menu-line medium"></div>
+                <div class="menu-line short"></div>
+                <div class="menu-line medium"></div>
+                <div class="menu-line long"></div>
+              </div>
+
+              <div class="browser-main">
+                <div class="chart-row">
+                  <div class="mini-chart">
+                    <div class="bar b1"></div>
+                    <div class="bar b2"></div>
+                    <div class="bar b3"></div>
+                    <div class="bar b4"></div>
+                  </div>
+
+                  <div class="mini-chart line-chart">
+                    <svg viewBox="0 0 200 90" preserveAspectRatio="none">
+                      <polyline
+                        points="12,70 45,55 75,60 105,38 135,45 170,18"
+                        fill="none"
+                        stroke="#1F4E79"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round" />
+                      <circle cx="12" cy="70" r="4" fill="#1F4E79" />
+                      <circle cx="45" cy="55" r="4" fill="#1F4E79" />
+                      <circle cx="75" cy="60" r="4" fill="#1F4E79" />
+                      <circle cx="105" cy="38" r="4" fill="#1F4E79" />
+                      <circle cx="135" cy="45" r="4" fill="#1F4E79" />
+                      <circle cx="170" cy="18" r="4" fill="#1F4E79" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="table-mini">
+                  <div style="width:96%;"></div>
+                  <div style="width:84%;"></div>
+                  <div style="width:92%;"></div>
+                  <div style="width:70%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="online-caption">Python-Streamlit &amp; R-Shinylive Web Apps</div>
+          <div class="cloud-icon">☁</div>
+          <div class="map-icon">⌖</div>
+          <div class="streamlit-icon">⚡</div>
+          <div class="rshiny-icon">R</div>
+          <div class="python-icon">Py</div>
+        </div>
+      </div>
+
+      <div class="statcal-online-content-card">
+        <div class="statcal-online-title">STATCAL ONLINE Innovation</div>
+
+        <div class="statcal-online-subtitle">
+          Web-based statistical tools for data analysis, visualization, regression, mapping, browser-based Shiny applications, and scientific reporting.
+        </div>
+
+        <div class="statcal-online-text-wrapper">
+          <p class="statcal-online-text">
+            <span class="statcal-online-highlight">STATCAL ONLINE</span> is an innovation of STATCAL designed as a web-based statistical computing platform. The latest version is developed through two online application approaches: <span class="statcal-online-highlight">Python-Streamlit</span> and <span class="statcal-online-highlight">R-Shinylive</span>. These technologies enable users to access statistical tools directly through a web browser without requiring complex statistical software installation.
+          </p>
+
+          <p class="statcal-online-text">
+            Python-Streamlit is used to build interactive statistical web applications with flexible data processing, visualization, and analytical features. In addition, R-Shinylive enables Shiny applications to run directly in the browser, supporting the development of online statistical tools based on the R ecosystem. More information about Shinylive is available on the CRAN page:
+            <a href="https://cran.r-project.org/web/packages/shinylive/index.html" target="_blank" style="color:#e3ff00; font-weight:bold;">
+              shinylive: Run 'shiny' Applications in the Browser
+            </a>.
+          </p>
+
+          <p class="statcal-online-text">
+            Through STATCAL ONLINE, users can perform data visualization, web page scraping, map generation, descriptive statistical analysis, categorical data analysis, regression analysis, panel data analysis, and other statistical procedures. The platform is developed to support academic, research, and professional activities by providing interactive analytical tools and publication-ready outputs.
+          </p>
+        </div>
+
+        <div class="statcal-online-tech-strip">
+          <div class="statcal-online-tech-pill">
+            <strong>Python-Streamlit</strong>
+            Interactive web apps for data processing and visualization.
+          </div>
+
+          <div class="statcal-online-tech-pill">
+            <strong>R-Shinylive</strong>
+            Browser-based Shiny applications using the R ecosystem.
+          </div>
+
+          <div class="statcal-online-tech-pill">
+            <strong>Without Complex Installation</strong>
+            Statistical tools can be accessed directly through a web browser.
+          </div>
+        </div>
+
+        <div class="statcal-online-features">
+          <div class="statcal-online-feature-card">
+            <span>✓ Online Access</span>
+            Run statistical applications directly through a web browser.
+          </div>
+
+          <div class="statcal-online-feature-card">
+            <span>✓ Data Visualization</span>
+            Create charts, maps, tables, and scientific figures.
+          </div>
+
+          <div class="statcal-online-feature-card">
+            <span>✓ Web Scraping</span>
+            Support online data collection and structured data extraction.
+          </div>
+
+          <div class="statcal-online-feature-card">
+            <span>✓ Statistical Analysis</span>
+            Perform descriptive statistics, regression, panel data analysis, and more.
+          </div>
+
+          <div class="statcal-online-feature-card">
+            <span>✓ Browser-Based Shiny Apps</span>
+            Run selected R-Shiny tools directly in the browser using Shinylive.
+          </div>
+
+          <div class="statcal-online-feature-card">
+            <span>✓ Scientific Reporting</span>
+            Support academic, research, and professional outputs with publication-ready results.
+          </div>
+        </div>
+
+        <div class="statcal-online-action-row">
+          <a href="statcal online.html" class="statcal-online-button">
+            Explore STATCAL ONLINE →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <br><br>
+
+
+  <!-- =====================================================
+       NEW SECTION: STATCAL MEMBER DISTRIBUTION MAP
+       map_statcal.html reads data_long_lat.xlsx
+       ===================================================== -->
+  <section class="statcal-map-section statcal-font">
+    <div class="statcal-map-kicker">STATCAL Community Map</div>
+
+    <h2 class="statcal-map-title">STATCAL Member Distribution</h2>
+
+    <p class="statcal-map-subtitle">
+      Explore the geographic distribution of STATCAL members by province.
+      Marker positions are generated from longitude and latitude coordinates,
+      while the number inside each marker represents the number of STATCAL members.
+    </p>
+
+    <div class="statcal-map-frame-wrap">
+      <iframe
+        class="statcal-map-frame"
+        src="map_statcal.html"
+        title="Interactive STATCAL Member Distribution Map"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <div class="statcal-map-note">
+      The map is generated dynamically from <strong>data_long_lat.xlsx</strong>.
+      Updating the Excel file updates the member distribution shown on the map.
+    </div>
+  </section>
+
+  <br><br>
+
+  <div class="statcal-article-section">
+    <center>
+      <div style="font-size: 50px; font-weight: 200px;">
+        Articles in Journal Using STATCAL
+      </div>
+
+      <br><br>
+
+      <iframe
+        src="https://gioprana89.github.io/statcal-article/"
+        width="80%"
+        frameborder="0"
+        scrolling="no"
+        height="700px">
+      </iframe>
+    </center>
+  </div>
+
+  <center>
+    <div class="statcal-footer-email">
+      Email: statcalonline@gmail.com
+    </div>
+  </center>
+
+  <br><br><br>
+
+  <div class="container"></div>
+
+  <ul class="bg-bubbles">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+  </ul>
+
+</div>
+<!-- partial -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="./script.js"></script>
+
+</body>
+</html>
